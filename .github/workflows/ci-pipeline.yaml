@@ -1,0 +1,9 @@
+name: bank-telemarketing-cd
+on:
+  - push
+
+jobs:
+  check-github-version
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3

@@ -3,7 +3,7 @@ import torch
 config = {
     "SEED": 64,
     "TRAIN_DATA_PATH": "data/train_data.csv",
-    "CHECKPOINT_PATH": "model_registry/checkpoint.pt",
+    "CHECKPOINT_DIR": "model_registry",
     "LOGS_PATH": "logs/metrics_logs.csv",
     "MODEL_PATH": "models/model.pt",
     "N_EPOCHS": 100,

@@ -1,6 +1,8 @@
 import csv
+import os
 import time
 from copy import deepcopy
+from typing import Optional
 
 import torch
 
@@ -8,35 +10,37 @@ from bank_telemarketing.train.train_model import train, evaluate
 
 
 def engine(
-    model,
-    train_dataloader,
-    eval_dataloader,
-    optimizer,
-    criterion,
-    checkpoint,
-    config,
-    pos_weight,
-    scheduler=None,
+        model,
+        train_dataloader,
+        eval_dataloader,
+        optimizer,
+        criterion,
+        config,
+        pos_weight,
+        checkpoint_dir: str,
+        logs_dir: str,
+        checkpoint: Optional[dict] = None,
+        scheduler=None,
 ):
-
     engine_start_time = time.time()
-    # if checkpoint:
-    #     best_valid_loss = checkpoint["best_valid_loss"]
-    #     best_f1 = checkpoint["best_f1"]
-    #     best_precision = checkpoint["best_precision"]
-    #     epoch_at_best = checkpoint["epoch_at_best"]
-    # else:
-    #     checkpoint = {}
-    #     best_valid_loss = 1e10
-    #     best_precision = 0.0
-    #     best_f1 = 0.0
-    #     epoch_at_best = 0
 
-    checkpoint = {}
-    best_valid_loss = 1e10
-    best_precision = 0.0
-    best_f1 = 0.0
-    epoch_at_best = 0
+    if checkpoint:
+        best_valid_loss = checkpoint["best_valid_loss"]
+        best_f1 = checkpoint["best_f1"]
+        best_precision = checkpoint["best_precision"]
+        epoch_at_best = checkpoint["epoch_at_best"]
+    else:
+        checkpoint = {}
+        best_valid_loss = 1e10
+        best_precision = 0.0
+        best_f1 = 0.0
+        epoch_at_best = 0
+
+    # checkpoint = {}
+    # best_valid_loss = 1e10
+    # best_precision = 0.0
+    # best_f1 = 0.0
+    # epoch_at_best = 0
 
     print("======================= Training Started ============================")
 
@@ -61,7 +65,7 @@ def engine(
             pos_weight=pos_weight,
         )
 
-        if scheduler is not None:
+        if scheduler:
             scheduler.step(metrics_valid["loss"])
 
         e_end_time = time.time()
@@ -88,9 +92,11 @@ def engine(
             checkpoint["best_precision"] = best_precision
             checkpoint["best_state_dict"] = best_state_dict
 
-            torch.save(checkpoint, config["CHECKPOINT_PATH"])
+            checkpoint_path = os.path.join(checkpoint_dir, f"checkpoint-{str(best_precision).replace('.', '')}.pt")
+            torch.save(checkpoint, checkpoint_path)
 
-        with open(config["LOGS_PATH"], "a") as f:
+        logs_path = os.path.join(logs_dir, "metrics.csv")
+        with open(logs_path, "a") as f:
             csv_writer = csv.DictWriter(
                 f, fieldnames=["epoch", "loss", "f1", "precision"]
             )

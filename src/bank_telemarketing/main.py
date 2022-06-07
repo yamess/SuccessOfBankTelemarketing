@@ -104,5 +104,5 @@ if __name__ == "__main__":
         config=config,
         scheduler=scheduler,
         pos_weight=pos_weight,
-        checkpoint=None
+        checkpoint_dir="model_registry"
     )
